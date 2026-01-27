@@ -1,0 +1,197 @@
+Atue como um desenvolvedor full stack sênior.
+
+Desenvolva um sistema web (SaaS MVP) chamado 
+**divulga.cuidadosmeus.com.br**, voltado à centralização e divulgação de leitos disponíveis em ILPIs (Instituições de Longa Permanência para Idosos).
+
+O sistema deve ser simples, funcional e focado em validação de MVP.
+
+────────────────────────────────────
+### Tecnologias obrigatórias
+────────────────────────────────────
+- Backend: PHP puro (sem frameworks)
+- Arquitetura: MVC
+- Banco de dados: SQLite
+- Frontend: HTML5, CSS3, JavaScript
+- Framework CSS: Bootstrap
+- Ícones: Font Awesome
+- Servidor: Apache
+
+────────────────────────────────────
+### Requisitos gerais
+────────────────────────────────────
+- Código limpo, organizado e comentado
+- Separação clara entre Model, View e Controller
+- Estrutura de pastas MVC bem definida
+- Segurança básica (sanitização de inputs)
+- Senhas armazenadas com hash seguro
+- Sistema preparado para rodar localmente
+
+────────────────────────────────────
+### Identidade visual
+────────────────────────────────────
+A interface deve seguir cores semelhantes ao site cuidadosmeus.com.br:
+
+- Cor principal: #00a99d
+- Fundo claro (branco ou cinza muito claro)
+- Textos em tons neutros (#333 ou #555)
+- Uso da cor principal apenas em botões, links e destaques
+- Visual limpo, acessível e amigável para usuários leigos
+
+────────────────────────────────────
+### Autenticação da ILPI
+────────────────────────────────────
+- Login por e-mail + senha
+- Um usuário principal por ILPI (responsável)
+- Cadastro simples da ILPI
+
+Campos obrigatórios:
+- Nome da ILPI
+- Cidade (selecionada do banco)
+- Estado (derivado da cidade)
+- Telefone / WhatsApp
+- Nome do responsável
+- E-mail (login)
+- Senha
+
+────────────────────────────────────
+### Localização (Cidades e Estados)
+────────────────────────────────────
+- Cidades e estados NÃO devem ser campos livres
+- Devem ser cadastrados previamente no banco
+- Cada cidade pertence a um estado (UF)
+- O cadastro da ILPI deve usar select/dropdown
+- O estado pode ser preenchido automaticamente ao selecionar a cidade
+- Filtros e pesquisas devem respeitar APENAS cidades e estados cadastrados
+
+────────────────────────────────────
+### Planos
+────────────────────────────────────
+Sistema de planos com limitação de leitos ativos:
+
+- Plano Básico: até 1 leito ativo
+- Plano Sênior: até 5 leitos ativos
+- Plano Master: até 30 leitos ativos
+
+Regras:
+- Leitos ativos = leitos divulgados como disponíveis
+- Impedir cadastro de novos leitos ao atingir o limite do plano
+- Exibir plano atual no painel da ILPI
+
+────────────────────────────────────
+### Gestão de Leitos
+────────────────────────────────────
+Cadastro de leitos por tipo (não individual):
+
+Campos:
+- Tipo de leito
+- Grau de dependência (deambulante, semi-dependente, dependente)
+- Valor mensal (ou "a partir de")
+- Status (Disponível / Ocupado)
+- Data da última atualização
+
+────────────────────────────────────
+### Painel da ILPI
+────────────────────────────────────
+- Dashboard simples
+- Visualizar plano contratado
+- Quantidade de leitos ativos utilizados
+- Atualizar status dos leitos com poucos cliques
+
+────────────────────────────────────
+### Listagem Pública
+────────────────────────────────────
+- Página pública do divulga.cuidadosmeus.com.br
+- Listar apenas ILPIs com leitos disponíveis
+- Filtros:
+  - Cidade
+  - Grau de dependência
+- Botão "Entrar em contato" com link direto para WhatsApp da ILPI
+- Não exibir dados sensíveis ou informações clínicas
+
+────────────────────────────────────
+### Banco de Dados (SQLite)
+────────────────────────────────────
+Criar tabelas:
+- estados (id, nome, uf)
+- cidades (id, nome, estado_id)
+- planos (id, nome, limite_leitos)
+- ilpis (id, nome, cidade_id, estado_id, telefone, responsavel, email, senha, plano_id)
+- leitos (id, ilpi_id, tipo, grau_dependencia, valor, status, updated_at)
+
+Incluir exemplos de SQL para criação das tabelas.
+
+────────────────────────────────────
+### Interface
+────────────────────────────────────
+- Layout responsivo com Bootstrap
+- Uso consistente de Font Awesome
+- Interface simples e intuitiva
+- Pensada para usuários com baixo nível técnico
+
+────────────────────────────────────
+### Entregáveis
+────────────────────────────────────
+- Estrutura completa de pastas MVC
+- Scripts SQL
+- Exemplos de Models, Controllers e Views
+- Sistema funcional rodando localmente
+
+⚠️ Não utilizar frameworks externos como Laravel, React, Vue ou similares.
+⚠️ Não implementar pagamento online no MVP.
+
+
+Prompt Refinado (Versão Full Stack Sênior)
+Objetivo: Desenvolver o MVP do sistema divulga.cuidadosmeus.com.br em PHP Puro (Vanilla), seguindo o padrão MVC para garantir manutenibilidade sem o uso de frameworks (Laravel, Symfony, etc.).
+
+1. Arquitetura do Projeto (Estrutura de Pastas): O sistema deve seguir rigorosamente esta estrutura:
+
+/app/Core: Classes base (Controller, Database, Router).
+
+/app/Controllers: Lógica de controle.
+
+/app/Models: Interação com SQLite usando PDO.
+
+/app/Views: Arquivos .php com HTML/Bootstrap (Template Engine simples).
+
+/public: Ponto de entrada (index.php), assets (css/js), imagens.
+
+/database: Arquivo database.sqlite e schema.sql.
+
+2. Sistema de Rotas (Sem .htaccess complexo): Crie um roteador simples no index.php que capture a URL e instancie o Controller/Método correspondente (Ex: /public/ilpi/login).
+
+3. Segurança Sênior:
+
+Uso obrigatório de Prepared Statements (PDO) para evitar SQL Injection.
+
+Senhas criptografadas com password_hash() e verificadas com password_verify().
+
+Sanitização de outputs com htmlspecialchars() para evitar XSS.
+
+Proteção básica de sessão com session_start() e regeneração de ID após login.
+
+4. Regras de Negócio e Banco (SQLite):
+
+Tabelas: estados, cidades, planos, ilpis, leitos.
+
+Lógica de Plano: No método store() do LeitosController, validar se COUNT(leitos_ativos) < planos.limite_leitos.
+
+Localização: Cadastro de ILPI via AJAX ou recarregamento de página que filtre Cidades ao selecionar o Estado (UF).
+
+5. Design e UI (Bootstrap 5):
+
+Identidade: Cor principal #00a99d.
+
+UX: Dashboard com cards informativos (Total de Leitos vs. Limite do Plano).
+
+Página Pública: Grid responsivo de cards. Cada card exibe: Nome da ILPI, Cidade/UF, Preço "A partir de", e botão flutuante/destacado de WhatsApp.
+
+6. Entregáveis Sugeridos:
+
+Script SQL completo para criação e dados iniciais (Cidades/Estados/Planos).
+
+Classe Database.php (Singleton com PDO).
+
+Exemplo de LeitoController.php e LeitoModel.php.
+
+Template principal header.php e footer.php.
+

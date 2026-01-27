@@ -3,3 +3,17 @@ database/*.*
 /database
 database/*.*
 *.sqlite
+
+public/assets/img/leitos/*.*
+public/assets/img/leitos/
+./public/assets/img/leitos/
+./public/assets/img/leitos/*.*
+/vendor/*.*
+*.env
+./.trae/*.*
+.trae/*.*
+/.trae/*
+*.md
+
+vendor
+/vendor
