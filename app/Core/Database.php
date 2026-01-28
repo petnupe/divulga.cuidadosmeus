@@ -12,7 +12,7 @@ class Database
 
     private function __construct()
     {
-        $dbPath = __DIR__ . '/../../database/database.sqlite';
+        $dbPath = __DIR__ . '/../../../../database_divulga/database.sqlite';
         try {
             $this->connection = new PDO("sqlite:$dbPath");
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

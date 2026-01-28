@@ -42,7 +42,7 @@
                                 <select name="plano_id" id="plano_id" class="form-select" required>
                                     <option value="">Selecione...</option>
                                     <?php foreach ($planos as $plano): ?>
-                                        <option value="<?= $plano['id'] ?>" <?= (isset($old['plano_id']) && $old['plano_id'] == $plano['id']) ? 'selected' : '' ?>>
+                                        <option value="<?= $plano['id'] ?>" <?= (isset($old['plano_id']) && $old['plano_id'] == $plano['id']) ? 'selected' : ((isset($_GET['plano']) && $_GET['plano'] == $plano['id']) ? 'selected' : '') ?>>
                                             <?= htmlspecialchars($plano['nome']) ?>
                                         </option>
                                     <?php endforeach; ?>
