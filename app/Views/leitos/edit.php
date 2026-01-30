@@ -7,6 +7,9 @@
                 <h4 class="mb-0 text-primary-custom">Editar Leito</h4>
             </div>
             <div class="card-body p-4">
+                <?php if (isset($error)): ?>
+                    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                <?php endif; ?>
                 <?php if (isset($_GET['error'])): ?>
                     <div class="alert alert-danger">
                         <?php 
@@ -69,7 +72,7 @@
                     <div class="mb-4">
                         <label for="fotos" class="form-label">Adicionar Fotos</label>
                         <input type="file" class="form-control" id="fotos" name="fotos[]" multiple accept="image/png, image/jpeg">
-                        <div class="form-text">Formatos aceitos: JPG, PNG. A quantidade total é limitada pelo seu plano.</div>
+                        <div class="form-text">Formatos aceitos: JPG, PNG. Limite do plano: <?= htmlspecialchars($foto_limit) ?> fotos. Restantes: <?= htmlspecialchars($foto_remaining) ?>.</div>
                     </div>
 
                     <div class="d-flex justify-content-between">

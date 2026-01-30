@@ -103,11 +103,17 @@ class LeitoController extends Controller
 
         $grauModel = new GrauDependencia();
         $fotoModel = new FotoLeito();
+        $ilpiModel = new ILPI();
+        $ilpi = $ilpiModel->getWithDetails($_SESSION['ilpi_id']);
+        $limit = $ilpi['limite_fotos'];
+        $remaining = max(0, $limit - $fotoModel->countByLeitoId($id));
         
         $this->view('leitos/edit', [
             'leito' => $leito,
             'graus' => $grauModel->getAll(),
-            'fotos' => $fotoModel->getByLeitoId($id)
+            'fotos' => $fotoModel->getByLeitoId($id),
+            'foto_limit' => $limit,
+            'foto_remaining' => $remaining
         ]);
     }
 
@@ -151,8 +157,24 @@ class LeitoController extends Controller
         ];
 
         if ($leitoModel->update($id, $data)) {
+            $errorMsg = null;
             if (isset($_FILES['fotos'])) {
-                $this->handlePhotos($id, $ilpi['limite_fotos']);
+                $result = $this->handlePhotos($id, $ilpi['limite_fotos']);
+                if (isset($result['error'])) {
+                    $errorMsg = $result['error'];
+                }
+            }
+            if ($errorMsg) {
+                $grauModel = new GrauDependencia();
+                $fotoModel = new FotoLeito();
+                $leito = $leitoModel->find($id);
+                $this->view('leitos/edit', [
+                    'leito' => $leito,
+                    'graus' => $grauModel->getAll(),
+                    'fotos' => $fotoModel->getByLeitoId($id),
+                    'error' => $errorMsg
+                ]);
+                return;
             }
             $this->redirect('/ilpi/dashboard');
         } else {
@@ -175,13 +197,26 @@ class LeitoController extends Controller
     {
         $fotoModel = new FotoLeito();
         $currentPhotos = $fotoModel->countByLeitoId($leitoId);
-        
+        if (!isset($_FILES['fotos']) || empty($_FILES['fotos']['name'])) {
+            return ['added' => 0, 'skipped' => 0];
+        }
         $files = $_FILES['fotos'];
         $count = count($files['name']);
-        
+        $added = 0;
+        $skipped = 0;
+        $remaining = max(0, $limit - $currentPhotos);
+        if ($remaining <= 0) {
+            return [
+                'added' => 0,
+                'skipped' => $count,
+                'error' => "Limite de fotos atingido para este leito. O plano permite no máximo $limit fotos."
+            ];
+        }
         for ($i = 0; $i < $count; $i++) {
-            if ($currentPhotos >= $limit) break;
-            
+            if ($added >= $remaining) {
+                $skipped += ($count - $i);
+                break;
+            }
             if ($files['error'][$i] === UPLOAD_ERR_OK) {
                 $tmpName = $files['tmp_name'][$i];
                 $name = basename($files['name'][$i]);
@@ -201,11 +236,19 @@ class LeitoController extends Controller
                             'url_foto' => '/assets/img/leitos/' . $newName,
                             'nome_arquivo' => $name
                         ]);
-                        $currentPhotos++;
+                        $added++;
                     }
                 }
             }
         }
+        if ($skipped > 0) {
+            return [
+                'added' => $added,
+                'skipped' => $skipped,
+                'warning' => "Algumas fotos não foram adicionadas. Limite: $limit. Restavam $remaining vagas de fotos."
+            ];
+        }
+        return ['added' => $added, 'skipped' => 0];
     }
     
     public function deletePhoto($id)
