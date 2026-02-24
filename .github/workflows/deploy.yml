@@ -1,0 +1,36 @@
+name: 🚀 Deploy via FTP
+
+on:
+  push:
+    branches:
+      - main  # Verifique se o nome da sua branch é 'main' ou 'master'
+
+jobs:
+  web-deploy:
+    name: 🎉 Sync Files
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔨 Install Dependencies (Composer)
+      # Instala as bibliotecas PHP para que você não precise subí-las manualmente
+      run: composer install --no-dev --optimize-autoloader
+
+    - name: 📂 Sync files via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        # O caminho exato que você me passou para a pasta do programa
+        server-dir: ./domains/cuidadosmeus.com.br/public_html/divulga/
+        # Lista de exclusão para não apagar o que já está no servidor
+        exclude: |
+          **/.git*
+          **/.github*
+          .env
+          database/*.sqlite
+          storage/logs/*.log
