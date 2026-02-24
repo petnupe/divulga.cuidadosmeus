@@ -237,6 +237,33 @@ class AdminController extends Controller
         $this->view('admin/transacoes', ['transacoes' => $transacoes, 'currentStatus' => $statusParam, 'selectedTx' => $selectedTx]);
     }
 
+    public function planos()
+    {
+        $this->checkAuth();
+        $planoModel = new Plano();
+        $planos = $planoModel->getAll();
+        $this->view('admin/planos', ['planos' => $planos]);
+    }
+
+    public function updatePlano($id)
+    {
+        $this->checkAuth();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/planos');
+        }
+        $planoModel = new Plano();
+        $valor = str_replace(['.', ','], ['', '.'], $_POST['valor'] ?? '0');
+        $data = [
+            'nome' => $_POST['nome'] ?? '',
+            'valor' => (float)$valor,
+            'limite_leitos' => (int)($_POST['limite_leitos'] ?? 0),
+            'limite_fotos' => (int)($_POST['limite_fotos'] ?? 0),
+            'exibir_redes_sociais' => isset($_POST['exibir_redes_sociais']) ? 1 : 0
+        ];
+        $planoModel->updatePlan($id, $data);
+        $this->redirect('/admin/planos?updated=1');
+    }
+
     public function gerarPixTransacao($id)
     {
         $this->checkAuth();
@@ -268,9 +295,16 @@ class AdminController extends Controller
         }
         try {
             $asaas = new AsaasService();
-            $asaas->cancelPayment($tx['asaas_id']);
-            $transacaoModel->updateStatus($id, 'CANCELLED');
-            $this->redirect('/admin/transacoes?cancel=ok');
+            $info = $asaas->getPayment($tx['asaas_id']);
+            $status = isset($info['status']) ? strtoupper($info['status']) : null;
+            if ($status === 'PENDING' || $status === 'PENDING_PAYMENT') {
+                $asaas->cancelPayment($tx['asaas_id']);
+                $transacaoModel->updateStatus($id, 'CANCELLED');
+                $this->redirect('/admin/transacoes?cancel=ok');
+            } else {
+                $msg = urlencode("Cobrança não pode ser cancelada (status atual: " . ($status ?: 'desconhecido') . ")");
+                $this->redirect('/admin/transacoes?cancel_error=1&msg=' . $msg);
+            }
         } catch (\Exception $e) {
             $msg = urlencode(substr($e->getMessage(), 0, 120));
             $this->redirect('/admin/transacoes?cancel_error=1&msg=' . $msg);

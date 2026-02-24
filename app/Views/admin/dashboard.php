@@ -67,8 +67,11 @@
                 <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Renovações e Planos</h5>
             </div>
             <div class="card-body">
-                <p>Acompanhe o histórico de renovações, vencimentos e valores dos planos contratados.</p>
-                <a href="/admin/renovacoes" class="btn btn-dark w-100">Ver Histórico de Renovações</a>
+                <p>Acompanhe renovações e edite os parâmetros dos planos disponíveis.</p>
+                <div class="d-grid gap-2">
+                    <a href="/admin/renovacoes" class="btn btn-outline-dark">Ver Histórico de Renovações</a>
+                    <a href="/admin/planos" class="btn btn-dark">Editar Planos</a>
+                </div>
             </div>
         </div>
     </div>

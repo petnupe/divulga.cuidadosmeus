@@ -71,6 +71,8 @@ $router->add('GET', '/admin/transacoes', 'AdminController', 'transacoes');
 $router->add('GET', '/admin/transacoes/pix/{id}', 'AdminController', 'gerarPixTransacao');
 $router->add('GET', '/admin/transacoes/cancel/{id}', 'AdminController', 'cancelarTransacao');
 $router->add('GET', '/admin/logout', 'AdminController', 'logout');
+$router->add('GET', '/admin/planos', 'AdminController', 'planos');
+$router->add('POST', '/admin/planos/update/{id}', 'AdminController', 'updatePlano');
 
 // Leito Routes
 $router->add('GET', '/ilpi/leitos/create', 'LeitoController', 'create');
