@@ -36,6 +36,7 @@ $router->add('GET', '/', 'HomeController', 'index');
 $router->add('GET', '/api/cidades/{estadoId}', 'ApiController', 'getCidades');
 $router->add('POST', '/api/track', 'ApiController', 'track');
 $router->add('POST', '/api/webhook/asaas', 'WebhookController', 'asaas');
+$router->add('GET', '/api/webhook/asaas', 'WebhookController', 'asaas');
 
 // Auth Routes
 $router->add('GET', '/ilpi/login', 'AuthController', 'login');
