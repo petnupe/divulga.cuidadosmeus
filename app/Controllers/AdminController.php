@@ -7,6 +7,8 @@ use App\Models\Admin;
 use App\Models\ILPI;
 use App\Models\Renovacao;
 use App\Models\Plano;
+use App\Models\Transacao;
+use App\Services\AsaasService;
 
 class AdminController extends Controller
 {
@@ -166,6 +168,112 @@ class AdminController extends Controller
     {
         if (!isset($_SESSION['admin_id'])) {
             $this->redirect('/admin/login');
+        }
+    }
+
+    public function password()
+    {
+        $this->checkAuth();
+        $this->view('admin/password');
+    }
+
+    public function updatePassword()
+    {
+        $this->checkAuth();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/password');
+        }
+        $current = $_POST['current_password'] ?? '';
+        $new = $_POST['new_password'] ?? '';
+        $confirm = $_POST['confirm_password'] ?? '';
+
+        if ($new !== $confirm) {
+            $this->view('admin/password', ['error' => 'As senhas não conferem.']);
+            return;
+        }
+
+        $adminModel = new Admin();
+        $admin = $adminModel->find($_SESSION['admin_id']);
+        if (!$admin || !password_verify($current, $admin['senha'])) {
+            $this->view('admin/password', ['error' => 'Senha atual incorreta.']);
+            return;
+        }
+
+        $hashed = password_hash($new, PASSWORD_DEFAULT);
+        $adminModel->updatePassword($_SESSION['admin_id'], $hashed);
+        $this->view('admin/password', ['success' => 'Senha atualizada com sucesso.']);
+    }
+
+    public function transacoes()
+    {
+        $this->checkAuth();
+        $transacaoModel = new Transacao();
+        $statusParam = $_GET['status'] ?? 'pending';
+        $map = [
+            'pending' => ['PENDING','PENDING_PAYMENT'],
+            'confirmado' => ['PAYMENT_CONFIRMED','PAYMENT_RECEIVED'],
+            'cancelado' => ['CANCELLED'],
+            'todos' => null
+        ];
+        $statuses = $map[$statusParam] ?? $map['pending'];
+        if ($statusParam === 'todos') {
+            $transacoes = $transacaoModel->getAllWithDetails();
+        } else {
+            $transacoes = $transacaoModel->getWithDetailsByStatuses($statuses);
+        }
+        $selectedId = isset($_GET['id']) ? (int)$_GET['id'] : null;
+        $selectedTx = null;
+        if ($selectedId) {
+            foreach ($transacoes as $row) {
+                if ((int)$row['id'] === $selectedId) {
+                    $selectedTx = $row;
+                    break;
+                }
+            }
+            if (!$selectedTx) {
+                $selectedTx = $transacaoModel->find($selectedId);
+            }
+        }
+        $this->view('admin/transacoes', ['transacoes' => $transacoes, 'currentStatus' => $statusParam, 'selectedTx' => $selectedTx]);
+    }
+
+    public function gerarPixTransacao($id)
+    {
+        $this->checkAuth();
+        $transacaoModel = new Transacao();
+        $tx = $transacaoModel->find($id);
+        if (!$tx || empty($tx['asaas_id'])) {
+            $this->redirect('/admin/transacoes');
+            return;
+        }
+        try {
+            $asaas = new AsaasService();
+            $pix = $asaas->getPixQrCode($tx['asaas_id']);
+            $transacaoModel->updatePixData($id, $pix['payload'] ?? null, $pix['encodedImage'] ?? null);
+            $this->redirect('/admin/transacoes?pix=ok&id=' . $id);
+        } catch (\Exception $e) {
+            $msg = urlencode(substr($e->getMessage(), 0, 120));
+            $this->redirect('/admin/transacoes?pix_error=1&msg=' . $msg);
+        }
+    }
+
+    public function cancelarTransacao($id)
+    {
+        $this->checkAuth();
+        $transacaoModel = new Transacao();
+        $tx = $transacaoModel->find($id);
+        if (!$tx || empty($tx['asaas_id'])) {
+            $this->redirect('/admin/transacoes');
+            return;
+        }
+        try {
+            $asaas = new AsaasService();
+            $asaas->cancelPayment($tx['asaas_id']);
+            $transacaoModel->updateStatus($id, 'CANCELLED');
+            $this->redirect('/admin/transacoes?cancel=ok');
+        } catch (\Exception $e) {
+            $msg = urlencode(substr($e->getMessage(), 0, 120));
+            $this->redirect('/admin/transacoes?cancel_error=1&msg=' . $msg);
         }
     }
 }

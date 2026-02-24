@@ -8,6 +8,8 @@ use App\Models\Leito;
 use App\Models\Renovacao;
 use App\Models\Estado;
 use App\Models\Cidade;
+use App\Models\Transacao;
+use App\Models\Plano;
 
 class DashboardController extends Controller
 {
@@ -25,10 +27,13 @@ class DashboardController extends Controller
         $ilpiModel = new ILPI();
         $leitoModel = new Leito();
         $renovacaoModel = new Renovacao();
+        $planoModel = new Plano();
 
         $ilpi = $ilpiModel->getWithDetails($ilpiId);
         $leitos = $leitoModel->getByIlpiId($ilpiId);
         $activeBeds = $ilpiModel->getActiveBedsCount($ilpiId);
+        $transacaoModel = new Transacao();
+        $pendingPayment = $transacaoModel->findPendingByIlpiId($ilpiId);
 
         // Check renewal status
         // Get latest renewal (assuming getByIlpiId orders by date DESC as implemented in Renovacao model)
@@ -56,7 +61,12 @@ class DashboardController extends Controller
             'leitos' => $leitos,
             'activeBeds' => $activeBeds,
             'isExpired' => $isExpired,
-            'dataVencimento' => $latestRenovacao ? $latestRenovacao['data_vencimento'] : null
+            'dataVencimento' => $latestRenovacao ? $latestRenovacao['data_vencimento'] : null,
+            'pendingPaymentUrl' => $pendingPayment['url_pagamento'] ?? null,
+            'pixPayload' => $pendingPayment['pix_payload'] ?? null,
+            'pixQrBase64' => $pendingPayment['pix_qr_base64'] ?? null,
+            'hasPendingPayment' => $pendingPayment && !empty($pendingPayment['asaas_id']),
+            'planos' => $planoModel->getAll()
         ]);
     }
 
@@ -121,7 +131,8 @@ class DashboardController extends Controller
             'complemento' => $_POST['complemento'] ?? '',
             'bairro' => $_POST['bairro'],
             'facebook' => $_POST['facebook'] ?? '',
-            'instagram' => $_POST['instagram'] ?? ''
+            'instagram' => $_POST['instagram'] ?? '',
+            'descricao' => mb_substr(trim($_POST['descricao'] ?? ''), 0, 300)
         ];
 
         // Only update password if provided

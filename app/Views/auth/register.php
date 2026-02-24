@@ -60,6 +60,7 @@
                         <div class="col-md-4">
                             <label for="cep" class="form-label">CEP *</label>
                             <input type="text" class="form-control" id="cep" name="cep" value="<?= htmlspecialchars($old['cep'] ?? '') ?>" required onblur="buscarCep(this.value)">
+                            <div id="cepLoading" class="form-text text-muted d-none"><span class="spinner-border spinner-border-sm"></span> Carregando endereço...</div>
                         </div>
                         <div class="col-md-4">
                             <label for="estado_id" class="form-label">Estado *</label>
@@ -77,6 +78,7 @@
                             <select name="cidade_id" id="cidade_id" class="form-select" required>
                                 <option value="">Selecione um estado primeiro</option>
                             </select>
+                            <div id="cidadeLoading" class="form-text text-muted d-none"><span class="spinner-border spinner-border-sm"></span> Carregando cidades...</div>
                         </div>
                     </div>
 
@@ -112,23 +114,44 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label for="senha" class="form-label">Senha *</label>
-                            <input type="password" class="form-control" id="senha" name="senha" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="senha" name="senha" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleVisibility('senha', this)" aria-label="Mostrar/ocultar senha"><i class="fas fa-eye"></i></button>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="confirm_senha" class="form-label">Confirmar Senha *</label>
-                            <input type="password" class="form-control" id="confirm_senha" name="confirm_senha" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="confirm_senha" name="confirm_senha" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleVisibility('confirm_senha', this)" aria-label="Mostrar/ocultar senha"><i class="fas fa-eye"></i></button>
+                            </div>
                         </div>
+                    </div>
+
+                    <h5 class="mb-3 border-bottom pb-2 mt-4">Descrição da ILPI</h5>
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Breve descrição (máx. 300 caracteres)</label>
+                        <textarea class="form-control" id="descricao" name="descricao" maxlength="300" rows="3" placeholder="Informe seus serviços, estrutura e diferenciais."><?= htmlspecialchars($old['descricao'] ?? '') ?></textarea>
+                        <small class="text-muted">Use até 300 caracteres.</small>
                     </div>
 
                     <h5 class="mb-3 border-bottom pb-2 mt-4">Redes Sociais (Opcional)</h5>
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label for="facebook" class="form-label"><i class="fab fa-facebook text-primary me-1"></i> Facebook</label>
-                            <input type="url" class="form-control" id="facebook" name="facebook" value="<?= htmlspecialchars($old['facebook'] ?? '') ?>" placeholder="https://facebook.com/...">
+                            <div class="input-group">
+                                <span class="input-group-text">facebook.com/</span>
+                                <input type="text" class="form-control" id="facebook" name="facebook" value="<?= htmlspecialchars($old['facebook'] ?? '') ?>" placeholder="seu-perfil" pattern="^[A-Za-z0-9._-]+$">
+                            </div>
+                            <small class="text-muted">Informe apenas o que vem após facebook.com/</small>
                         </div>
                         <div class="col-md-6">
                             <label for="instagram" class="form-label"><i class="fab fa-instagram text-danger me-1"></i> Instagram</label>
-                            <input type="url" class="form-control" id="instagram" name="instagram" value="<?= htmlspecialchars($old['instagram'] ?? '') ?>" placeholder="https://instagram.com/...">
+                            <div class="input-group">
+                                <span class="input-group-text">instagram.com/</span>
+                                <input type="text" class="form-control" id="instagram" name="instagram" value="<?= htmlspecialchars($old['instagram'] ?? '') ?>" placeholder="seu-usuario" pattern="^[A-Za-z0-9._-]+$">
+                            </div>
+                            <small class="text-muted">Informe apenas o que vem após instagram.com/</small>
                         </div>
                         <div class="col-12 mt-2">
                             <small class="text-muted">* A exibição das redes sociais na página pública depende do plano contratado (Sênior ou Master).</small>
@@ -136,6 +159,12 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary-custom w-100 py-2">Cadastrar</button>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" value="1" id="termos" name="termos" required>
+                        <label class="form-check-label" for="termos">
+                            Li e aceito os <a href="#" data-bs-toggle="modal" data-bs-target="#termosModal">Termos de Uso</a>.
+                        </label>
+                    </div>
                 </form>
 
                 <div class="text-center mt-4">
@@ -192,13 +221,57 @@
     </div>
 </div>
 
+<!-- Termos Modal -->
+<div class="modal fade" id="termosModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fas fa-file-contract me-2"></i>Termos de Uso</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ol class="small">
+                    <li>
+                        <strong>Veracidade e Atualização das Vagas</strong><br>
+                        A instituição compromete-se a atualizar a disponibilidade de leitos em tempo real, isentando a plataforma de qualquer responsabilidade por informações desatualizadas ou divergências entre o estoque virtual e o físico.
+                    </li>
+                    <li class="mt-2">
+                        <strong>Natureza Meramente Informativa</strong><br>
+                        A visualização da vaga no portal não garante a admissão automática do idoso, que permanece condicionada à avaliação multiprofissional e à assinatura de contrato específico entre a família e a ILPI.
+                    </li>
+                    <li class="mt-2">
+                        <strong>Conformidade com a LGPD</strong><br>
+                        A ILPI declara possuir autorização expressa para o compartilhamento de quaisquer dados ou imagens de suas dependências e serviços, respondendo isoladamente por qualquer violação à Lei Geral de Proteção de Dados (LGPD).
+                    </li>
+                    <li class="mt-2">
+                        <strong>Limitação de Responsabilidade</strong><br>
+                        A plataforma atua como mera facilitadora de busca, não possuindo vínculo solidário quanto à qualidade técnica, assistencial ou clínica dos serviços prestados pela ILPI anunciante.
+                    </li>
+                    <li class="mt-2">
+                        <strong>Regras de Conduta na Divulgação</strong><br>
+                        É vedada a publicação de informações falsas, imagens meramente ilustrativas que não correspondam à realidade da instituição ou qualquer conteúdo que induza o consumidor a erro, sob pena de suspensão imediata da conta.
+                    </li>
+                </ol>
+                <div class="alert alert-secondary small mt-3 mb-0">
+                    Recomenda-se revisão jurídica especializada (Direito Digital e Saúde) considerando ANVISA RDC 502/2021 e Estatuto do Idoso.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 function loadCidades(estadoId, selectedCidadeId = null) {
     const cidadeSelect = document.getElementById('cidade_id');
     cidadeSelect.innerHTML = '<option value="">Carregando...</option>';
+    const cidadeLoading = document.getElementById('cidadeLoading');
+    if (cidadeLoading) cidadeLoading.classList.remove('d-none');
     
     if (!estadoId) {
         cidadeSelect.innerHTML = '<option value="">Selecione um estado primeiro</option>';
+        if (cidadeLoading) cidadeLoading.classList.add('d-none');
         return;
     }
 
@@ -210,15 +283,17 @@ function loadCidades(estadoId, selectedCidadeId = null) {
                 const option = document.createElement('option');
                 option.value = cidade.id;
                 option.textContent = cidade.nome;
-                if (selectedCidadeId && cidade.id == selectedCidadeId) {
+                if (selectedCidadeId && (cidade.id == selectedCidadeId || cidade.nome == selectedCidadeId)) {
                     option.selected = true;
                 }
                 cidadeSelect.appendChild(option);
             });
+            if (cidadeLoading) cidadeLoading.classList.add('d-none');
         })
         .catch(error => {
             console.error('Error:', error);
             cidadeSelect.innerHTML = '<option value="">Erro ao carregar cidades</option>';
+            if (cidadeLoading) cidadeLoading.classList.add('d-none');
         });
 }
 
@@ -230,12 +305,61 @@ function loadCidades(estadoId, selectedCidadeId = null) {
 <?php endif; ?>
 
 function buscarCep(cep) {
-    // Basic implementation for MVP - user types manually if API fails or just for helper
-    // For MVP, we'll just leave it manual entry or implement ViaCEP if easy.
-    // Let's stick to manual entry for simplicity as per requirements "MVP".
-    // But I added onblur="buscarCep(this.value)", I can remove it or implement it.
-    // I'll leave empty function for now or remove.
+    cep = (cep || '').replace(/\D/g, '');
+    if (!cep || cep.length !== 8) return;
+    const cepLoading = document.getElementById('cepLoading');
+    if (cepLoading) cepLoading.classList.remove('d-none');
+    const ufMap = {
+        <?php foreach ($estados as $estado): ?>
+        '<?= $estado['uf'] ?>': <?= $estado['id'] ?>,
+        <?php endforeach; ?>
+    };
+    const endereco = document.getElementById('endereco');
+    const bairro = document.getElementById('bairro');
+    const estadoSel = document.getElementById('estado_id');
+    const cidadeSel = document.getElementById('cidade_id');
+    if (endereco) endereco.setAttribute('disabled', 'disabled');
+    if (bairro) bairro.setAttribute('disabled', 'disabled');
+    if (estadoSel) estadoSel.setAttribute('disabled', 'disabled');
+    if (cidadeSel) cidadeSel.setAttribute('disabled', 'disabled');
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+        .then(r => r.json())
+        .then(d => {
+            if (!d || d.erro) return;
+            if (d.uf !== 'RS') return;
+            if (endereco) endereco.value = d.logradouro || '';
+            if (bairro) bairro.value = d.bairro || '';
+            const ufId = ufMap[d.uf] || null;
+            if (ufId) {
+                estadoSel.value = ufId;
+                loadCidades(ufId, d.localidade || null);
+            }
+        })
+        .finally(() => {
+            if (cepLoading) cepLoading.classList.add('d-none');
+            if (endereco) endereco.removeAttribute('disabled');
+            if (bairro) bairro.removeAttribute('disabled');
+            if (estadoSel) estadoSel.removeAttribute('disabled');
+            if (cidadeSel) cidadeSel.removeAttribute('disabled');
+        })
+        .catch(() => {});
 }
 </script>
 
 <?php require_once __DIR__ . '/../footer.php'; ?>
+<script>
+function toggleVisibility(id, btn) {
+    const input = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>

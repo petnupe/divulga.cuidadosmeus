@@ -6,6 +6,8 @@ use App\Core\Controller;
 use App\Models\ILPI;
 use App\Models\Estado;
 use App\Models\Plano;
+use App\Services\AsaasService;
+use App\Models\Transacao;
 
 class AuthController extends Controller
 {
@@ -74,7 +76,7 @@ class AuthController extends Controller
         }
 
         // Basic Validation
-        $required = ['nome', 'cnpj', 'cidade_id', 'estado_id', 'telefone', 'responsavel', 'email', 'senha', 'confirm_senha', 'plano_id', 'cep', 'endereco', 'numero', 'bairro'];
+        $required = ['nome', 'cnpj', 'cidade_id', 'estado_id', 'telefone', 'responsavel', 'email', 'senha', 'confirm_senha', 'plano_id', 'cep', 'endereco', 'numero', 'bairro', 'termos'];
         foreach ($required as $field) {
             if (empty($_POST[$field])) {
                 $this->registerWithError('Preencha todos os campos obrigatórios.');
@@ -124,7 +126,10 @@ class AuthController extends Controller
             'complemento' => $_POST['complemento'] ?? '',
             'bairro' => $_POST['bairro'],
             'facebook' => $_POST['facebook'] ?? '',
-            'instagram' => $_POST['instagram'] ?? ''
+            'instagram' => $_POST['instagram'] ?? '',
+            'termos_aceitos' => 1,
+            'termos_aceitos_em' => date('Y-m-d H:i:s'),
+            'descricao' => mb_substr(trim($_POST['descricao'] ?? ''), 0, 300)
         ];
 
         if ($ilpiModel->create($data)) {
@@ -137,7 +142,48 @@ class AuthController extends Controller
             $_SESSION['ilpi_name'] = $ilpi['nome'];
             $_SESSION['ilpi_plan'] = $ilpi['plano_id'];
             $_SESSION['ilpi_status'] = $ilpi['status'];
-            
+            try {
+                $planoModel = new Plano();
+                $plano = $planoModel->find($ilpi['plano_id']);
+
+                if ($plano && isset($plano['valor']) && $plano['valor'] > 0) {
+                    $asaasService = new AsaasService();
+                    
+                    $customerResponse = $asaasService->createCustomer($ilpi);
+                    
+                    if (isset($customerResponse['id'])) {
+                        $customerId = $customerResponse['id'];
+                        
+                        $dueDate = date('Y-m-d', strtotime('+3 days'));
+                        $paymentResponse = $asaasService->createPixPayment(
+                            $customerId,
+                            $plano['valor'],
+                            "Adesão Plano " . $plano['nome'],
+                            $dueDate
+                        );
+
+                        if (isset($paymentResponse['id'])) {
+                            $pix = $asaasService->getPixQrCode($paymentResponse['id']);
+                            $transacaoModel = new Transacao();
+                            $transacaoModel->create([
+                                'ilpi_id' => $ilpi['id'],
+                                'asaas_id' => $paymentResponse['id'],
+                                'asaas_customer_id' => $customerId,
+                                'valor' => $plano['valor'],
+                                'status' => $paymentResponse['status'] ?? 'PENDING',
+                                'url_pagamento' => $paymentResponse['invoiceUrl'] ?? null,
+                                'pix_payload' => $pix['payload'] ?? null,
+                                'pix_qr_base64' => $pix['encodedImage'] ?? null,
+                                'tipo' => 'ADESAO'
+                            ]);
+
+                            $this->redirect('/ilpi/dashboard');
+                            return;
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+            }
             $this->redirect('/ilpi/dashboard');
         } else {
             $this->registerWithError('Erro ao cadastrar. Tente novamente.');

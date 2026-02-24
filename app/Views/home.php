@@ -85,16 +85,16 @@
 
                         <div class="d-grid gap-2">
                             <a href="https://wa.me/55<?= preg_replace('/\D/', '', $ilpi['telefone']) ?>?text=Olá, vi seu anúncio no Divulga Cuidados Meus e gostaria de mais informações." 
-                               class="btn btn-outline-success" target="_blank">
+                               class="btn btn-outline-success" target="_blank" onclick="trackClick('whatsapp', <?= (int)$ilpi['id'] ?>)">
                                 <i class="fab fa-whatsapp me-2"></i>Contatar via WhatsApp
                             </a>
                             <a href="https://www.google.com/maps/search/?api=1&query=<?= urlencode($ilpi['endereco'] . ', ' . $ilpi['numero'] . ' - ' . $ilpi['cidade_nome'] . ' - ' . $ilpi['estado_uf']) ?>" 
-                               class="btn btn-outline-secondary btn-sm" target="_blank">
+                               class="btn btn-outline-secondary btn-sm" target="_blank" onclick="trackClick('map', <?= (int)$ilpi['id'] ?>)">
                                 <i class="fas fa-map-marked-alt me-2"></i>Ver no Mapa
                             </a>
                             
                             <?php if (!empty($ilpi['todas_fotos'])): ?>
-                                <button type="button" class="btn btn-primary-custom btn-sm" onclick="openPhotoGallery('<?= htmlspecialchars($ilpi['todas_fotos']) ?>', '<?= htmlspecialchars(addslashes($ilpi['nome'])) ?>')">
+                                <button type="button" class="btn btn-primary-custom btn-sm" onclick="trackClick('photos_open', <?= (int)$ilpi['id'] ?>); openPhotoGallery('<?= htmlspecialchars($ilpi['todas_fotos']) ?>', '<?= htmlspecialchars(addslashes($ilpi['nome'])) ?>')">
                                     <i class="fas fa-images me-2"></i>Ver Fotos
                                 </button>
                             <?php endif; ?>
@@ -102,11 +102,11 @@
                         
                         <?php if ($ilpi['exibir_redes_sociais']): ?>
                             <div class="mt-3 text-center border-top pt-2">
-                                <?php if ($ilpi['facebook']): ?>
-                                    <a href="<?= htmlspecialchars($ilpi['facebook']) ?>" class="text-secondary me-3" target="_blank"><i class="fab fa-facebook fa-lg"></i></a>
+                                <?php if (!empty($ilpi['facebook'])): ?>
+                                    <a href="https://facebook.com/<?= htmlspecialchars($ilpi['facebook']) ?>" class="text-secondary me-3" target="_blank" rel="noopener" onclick="trackClick('facebook', <?= (int)$ilpi['id'] ?>)"><i class="fab fa-facebook fa-lg"></i></a>
                                 <?php endif; ?>
-                                <?php if ($ilpi['instagram']): ?>
-                                    <a href="<?= htmlspecialchars($ilpi['instagram']) ?>" class="text-secondary" target="_blank"><i class="fab fa-instagram fa-lg"></i></a>
+                                <?php if (!empty($ilpi['instagram'])): ?>
+                                    <a href="https://instagram.com/<?= htmlspecialchars($ilpi['instagram']) ?>" class="text-secondary" target="_blank" rel="noopener" onclick="trackClick('instagram', <?= (int)$ilpi['id'] ?>)"><i class="fab fa-instagram fa-lg"></i></a>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
@@ -172,6 +172,15 @@ function openPhotoGallery(photosString, ilpiName) {
     modal.show();
 }
 
+function trackClick(type, ilpiId) {
+    try {
+        fetch('/api/track', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ type: type, ilpi_id: ilpiId })
+        });
+    } catch (e) {}
+}
 function loadCidades(estadoId) {
     const cidadeSelect = document.getElementById('cidade_id');
     cidadeSelect.innerHTML = '<option value="">Carregando...</option>';

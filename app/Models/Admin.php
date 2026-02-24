@@ -14,4 +14,10 @@ class Admin extends Model
         $stmt->execute(['email' => $email]);
         return $stmt->fetch();
     }
+
+    public function updatePassword($id, $hashed)
+    {
+        $stmt = $this->db->prepare("UPDATE {$this->table} SET senha = :senha WHERE id = :id");
+        return $stmt->execute(['senha' => $hashed, 'id' => $id]);
+    }
 }

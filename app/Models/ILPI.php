@@ -9,12 +9,31 @@ class ILPI extends Model
 {
     protected $table = 'ilpis';
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->ensureColumns();
+    }
+
+    private function ensureColumns()
+    {
+        try { $this->db->exec("ALTER TABLE {$this->table} ADD COLUMN termos_aceitos INTEGER DEFAULT 0"); } catch (\Exception $e) {}
+        try { $this->db->exec("ALTER TABLE {$this->table} ADD COLUMN termos_aceitos_em DATETIME"); } catch (\Exception $e) {}
+        try { $this->db->exec("ALTER TABLE {$this->table} ADD COLUMN descricao TEXT"); } catch (\Exception $e) {}
+        try { $this->db->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_ilpis_cnpj ON {$this->table}(cnpj)"); } catch (\Exception $e) {}
+        try { $this->db->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_ilpis_email ON {$this->table}(email)"); } catch (\Exception $e) {}
+        try { $this->db->exec("ALTER TABLE {$this->table} ADD COLUMN whatsapp_clicks INTEGER DEFAULT 0"); } catch (\Exception $e) {}
+        try { $this->db->exec("ALTER TABLE {$this->table} ADD COLUMN facebook_clicks INTEGER DEFAULT 0"); } catch (\Exception $e) {}
+        try { $this->db->exec("ALTER TABLE {$this->table} ADD COLUMN map_clicks INTEGER DEFAULT 0"); } catch (\Exception $e) {}
+        try { $this->db->exec("ALTER TABLE {$this->table} ADD COLUMN photos_open INTEGER DEFAULT 0"); } catch (\Exception $e) {}
+    }
+
     public function create($data)
     {
         $sql = "INSERT INTO {$this->table} 
-                (nome, cnpj, status, cidade_id, estado_id, telefone, responsavel, email, senha, plano_id, cep, endereco, numero, complemento, bairro, facebook, instagram) 
+                (nome, cnpj, status, cidade_id, estado_id, telefone, responsavel, email, senha, plano_id, cep, endereco, numero, complemento, bairro, facebook, instagram, termos_aceitos, termos_aceitos_em, descricao) 
                 VALUES 
-                (:nome, :cnpj, :status, :cidade_id, :estado_id, :telefone, :responsavel, :email, :senha, :plano_id, :cep, :endereco, :numero, :complemento, :bairro, :facebook, :instagram)";
+                (:nome, :cnpj, :status, :cidade_id, :estado_id, :telefone, :responsavel, :email, :senha, :plano_id, :cep, :endereco, :numero, :complemento, :bairro, :facebook, :instagram, :termos_aceitos, :termos_aceitos_em, :descricao)";
         
         $stmt = $this->db->prepare($sql);
         
@@ -132,6 +151,24 @@ class ILPI extends Model
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll();
+    }
+
+    public function incrementMetric($id, $type)
+    {
+        $allowed = [
+            'whatsapp' => 'whatsapp_clicks',
+            'facebook' => 'facebook_clicks',
+            'instagram' => 'facebook_clicks', // consolidar em facebook_clicks por simplicidade
+            'map' => 'map_clicks',
+            'photos_open' => 'photos_open'
+        ];
+        if (!isset($allowed[$type])) {
+            return false;
+        }
+        $column = $allowed[$type];
+        $sql = "UPDATE {$this->table} SET {$column} = COALESCE({$column},0) + 1 WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(['id' => $id]);
     }
 
     public function delete($id)

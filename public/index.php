@@ -34,6 +34,8 @@ $router->add('GET', '/', 'HomeController', 'index');
 
 // API Routes
 $router->add('GET', '/api/cidades/{estadoId}', 'ApiController', 'getCidades');
+$router->add('POST', '/api/track', 'ApiController', 'track');
+$router->add('POST', '/api/webhook/asaas', 'WebhookController', 'asaas');
 
 // Auth Routes
 $router->add('GET', '/ilpi/login', 'AuthController', 'login');
@@ -51,6 +53,8 @@ $router->add('GET', '/ilpi/dashboard', 'DashboardController', 'index');
 $router->add('GET', '/ilpi/profile', 'DashboardController', 'profile');
 $router->add('POST', '/ilpi/profile', 'DashboardController', 'updateProfile');
 $router->add('POST', '/ilpi/delete-account', 'DashboardController', 'deleteAccount');
+$router->add('GET', '/ilpi/payment/pix', 'PaymentController', 'generatePix');
+$router->add('GET', '/ilpi/payment/status', 'PaymentController', 'status');
 
 // Admin Routes
 $router->add('GET', '/admin/login', 'AdminController', 'login');
@@ -61,6 +65,11 @@ $router->add('GET', '/admin/approve/{id}', 'AdminController', 'approve');
 $router->add('GET', '/admin/reject/{id}', 'AdminController', 'reject');
 $router->add('GET', '/admin/renovacoes', 'AdminController', 'renovacoes');
 $router->add('POST', '/admin/renovacoes/store', 'AdminController', 'storeRenovacao');
+$router->add('GET', '/admin/password', 'AdminController', 'password');
+$router->add('POST', '/admin/password', 'AdminController', 'updatePassword');
+$router->add('GET', '/admin/transacoes', 'AdminController', 'transacoes');
+$router->add('GET', '/admin/transacoes/pix/{id}', 'AdminController', 'gerarPixTransacao');
+$router->add('GET', '/admin/transacoes/cancel/{id}', 'AdminController', 'cancelarTransacao');
 $router->add('GET', '/admin/logout', 'AdminController', 'logout');
 
 // Leito Routes

@@ -3,6 +3,11 @@
     <footer class="bg-white py-4 mt-5 border-top">
         <div class="container text-center text-muted">
             <small>&copy; <?php echo date('Y'); ?> Divulga Cuidados Meus. Todos os direitos reservados.</small>
+            <div class="mt-2">
+                <a href="mailto:contato@cuidadosmeus.com.br" class="text-muted text-decoration-none"><i class="fas fa-envelope me-1"></i> contato@cuidadosmeus.com.br</a>
+                <span class="mx-2">•</span>
+                <a href="https://wa.me/5551991289103" target="_blank" rel="noopener" class="text-success text-decoration-none"><i class="fab fa-whatsapp me-1"></i> (51) 99128-9103</a>
+            </div>
         </div>
     </footer>
 

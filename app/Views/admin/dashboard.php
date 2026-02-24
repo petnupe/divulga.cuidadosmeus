@@ -72,6 +72,17 @@
             </div>
         </div>
     </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Cobranças Pendentes</h5>
+            </div>
+            <div class="card-body">
+                <p>Gerencie cobranças em aberto: gerar QR Code PIX, abrir invoice e cancelar quando necessário.</p>
+                <a href="/admin/transacoes" class="btn btn-dark w-100">Acessar Transações</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php require_once __DIR__ . '/../footer.php'; ?>

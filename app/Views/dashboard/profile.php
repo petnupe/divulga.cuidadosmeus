@@ -53,7 +53,8 @@
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label for="cep" class="form-label">CEP *</label>
-                            <input type="text" class="form-control" id="cep" name="cep" value="<?= htmlspecialchars($ilpi['cep']) ?>" required>
+                            <input type="text" class="form-control" id="cep" name="cep" value="<?= htmlspecialchars($ilpi['cep']) ?>" required onblur="buscarCep(this.value)">
+                            <div id="cepLoading" class="form-text text-muted d-none"><span class="spinner-border spinner-border-sm"></span> Carregando endereço...</div>
                         </div>
                         <div class="col-md-4">
                             <label for="estado_id" class="form-label">Estado *</label>
@@ -76,6 +77,7 @@
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                            <div id="cidadeLoading" class="form-text text-muted d-none"><span class="spinner-border spinner-border-sm"></span> Carregando cidades...</div>
                         </div>
                     </div>
 
@@ -99,15 +101,30 @@
                         <input type="text" class="form-control" id="complemento" name="complemento" value="<?= htmlspecialchars($ilpi['complemento']) ?>">
                     </div>
 
+                    <h5 class="mb-3 border-bottom pb-2 mt-4">Descrição da ILPI</h5>
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Breve descrição (máx. 300 caracteres)</label>
+                        <textarea class="form-control" id="descricao" name="descricao" maxlength="300" rows="3" placeholder="Informe seus serviços, estrutura e diferenciais."><?= htmlspecialchars($ilpi['descricao'] ?? '') ?></textarea>
+                        <small class="text-muted">Use até 300 caracteres.</small>
+                    </div>
+
                     <h5 class="mb-3 border-bottom pb-2 mt-4">Redes Sociais</h5>
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label for="facebook" class="form-label"><i class="fab fa-facebook text-primary me-1"></i> Facebook</label>
-                            <input type="url" class="form-control" id="facebook" name="facebook" value="<?= htmlspecialchars($ilpi['facebook']) ?>" placeholder="https://facebook.com/...">
+                            <div class="input-group">
+                                <span class="input-group-text">facebook.com/</span>
+                                <input type="text" class="form-control" id="facebook" name="facebook" value="<?= htmlspecialchars($ilpi['facebook']) ?>" placeholder="seu-perfil" pattern="^[A-Za-z0-9._-]+$">
+                            </div>
+                            <small class="text-muted">Informe apenas o que vem após facebook.com/</small>
                         </div>
                         <div class="col-md-6">
                             <label for="instagram" class="form-label"><i class="fab fa-instagram text-danger me-1"></i> Instagram</label>
-                            <input type="url" class="form-control" id="instagram" name="instagram" value="<?= htmlspecialchars($ilpi['instagram']) ?>" placeholder="https://instagram.com/...">
+                            <div class="input-group">
+                                <span class="input-group-text">instagram.com/</span>
+                                <input type="text" class="form-control" id="instagram" name="instagram" value="<?= htmlspecialchars($ilpi['instagram']) ?>" placeholder="seu-usuario" pattern="^[A-Za-z0-9._-]+$">
+                            </div>
+                            <small class="text-muted">Informe apenas o que vem após instagram.com/</small>
                         </div>
                     </div>
 
@@ -131,12 +148,15 @@
 </div>
 
 <script>
-function loadCidades(estadoId) {
+function loadCidades(estadoId, selectedCidade = null) {
     const cidadeSelect = document.getElementById('cidade_id');
     cidadeSelect.innerHTML = '<option value="">Carregando...</option>';
+    const cidadeLoading = document.getElementById('cidadeLoading');
+    if (cidadeLoading) cidadeLoading.classList.remove('d-none');
     
     if (!estadoId) {
         cidadeSelect.innerHTML = '<option value="">Selecione um estado primeiro</option>';
+        if (cidadeLoading) cidadeLoading.classList.add('d-none');
         return;
     }
 
@@ -148,13 +168,50 @@ function loadCidades(estadoId) {
                 const option = document.createElement('option');
                 option.value = cidade.id;
                 option.textContent = cidade.nome;
+                if (selectedCidade && (cidade.id == selectedCidade || cidade.nome == selectedCidade)) {
+                    option.selected = true;
+                }
                 cidadeSelect.appendChild(option);
             });
+            if (cidadeLoading) cidadeLoading.classList.add('d-none');
         })
         .catch(error => {
             console.error('Error:', error);
             cidadeSelect.innerHTML = '<option value="">Erro ao carregar cidades</option>';
+            if (cidadeLoading) cidadeLoading.classList.add('d-none');
         });
+}
+
+function buscarCep(cep) {
+    cep = (cep || '').replace(/\D/g, '');
+    if (!cep || cep.length !== 8) return;
+    const cepLoading = document.getElementById('cepLoading');
+    if (cepLoading) cepLoading.classList.remove('d-none');
+    const ufMap = {
+        <?php foreach ($estados as $estado): ?>
+        '<?= $estado['uf'] ?>': <?= $estado['id'] ?>,
+        <?php endforeach; ?>
+    };
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+        .then(r => r.json())
+        .then(d => {
+            if (!d || d.erro) return;
+            if (d.uf !== 'RS') return;
+            const endereco = document.getElementById('endereco');
+            const bairro = document.getElementById('bairro');
+            const estadoSel = document.getElementById('estado_id');
+            if (endereco) endereco.value = d.logradouro || '';
+            if (bairro) bairro.value = d.bairro || '';
+            const ufId = ufMap[d.uf] || null;
+            if (ufId) {
+                estadoSel.value = ufId;
+                loadCidades(ufId, d.localidade || null);
+            }
+        })
+        .finally(() => {
+            if (cepLoading) cepLoading.classList.add('d-none');
+        })
+        .catch(() => {});
 }
 </script>
 
