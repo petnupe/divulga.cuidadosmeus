@@ -31,6 +31,7 @@ $router = new Router();
 
 // Public Routes
 $router->add('GET', '/', 'HomeController', 'index');
+$router->add('GET', '/divulgue', 'HomeController', 'divulgue');
 
 // API Routes
 $router->add('GET', '/api/cidades/{estadoId}', 'ApiController', 'getCidades');

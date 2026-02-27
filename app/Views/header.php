@@ -14,63 +14,10 @@
     <!-- IMask JS -->
     <script src="https://unpkg.com/imask"></script>
     
-    <style>
-        :root {
-            --primary-color: #00a99d;
-            --secondary-color: #f8f9fa;
-        }
-        
-        body {
-            background-color: var(--secondary-color);
-            color: #333;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-        
-        .text-primary-custom {
-            color: var(--primary-color) !important;
-        }
-        
-        .bg-primary-custom {
-            background-color: var(--primary-color) !important;
-        }
-        
-        .btn-primary-custom {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-primary-custom:hover {
-            background-color: #008f84;
-            border-color: #008f84;
-            color: white;
-        }
-        
-        .btn-outline-primary-custom {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .btn-outline-primary-custom:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .navbar-brand {
-            padding: 0;
-        }
-
-        .card {
-            border: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link href="/assets/css/style.css" rel="stylesheet">
+    <!-- Custom JS -->
+    <script src="/assets/js/scripts.js" defer></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">

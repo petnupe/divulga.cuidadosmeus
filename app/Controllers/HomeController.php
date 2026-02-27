@@ -10,6 +10,21 @@ use App\Models\GrauDependencia;
 
 class HomeController extends Controller
 {
+    public function divulgue()
+    {
+        $landingPath = __DIR__ . '/../../public/landing/index.html';
+
+        if (!file_exists($landingPath)) {
+            http_response_code(404);
+            echo 'Landing page not found.';
+            return;
+        }
+
+        header('Content-Type: text/html; charset=UTF-8');
+        readfile($landingPath);
+        exit;
+    }
+
     public function index()
     {
         $ilpiModel = new ILPI();
