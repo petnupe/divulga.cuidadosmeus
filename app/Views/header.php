@@ -18,6 +18,12 @@
     <link href="/assets/css/style.css" rel="stylesheet">
     <!-- Custom JS -->
     <script src="/assets/js/scripts.js" defer></script>
+    <?php
+    $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    if (!preg_match('#^/(admin|ilpi)(/|$)#', $uri)) {
+    ?>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3793901849610477" crossorigin="anonymous"></script>
+    <?php } ?>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
