@@ -25,6 +25,37 @@ class HomeController extends Controller
         exit;
     }
 
+    public function sitemap()
+    {
+        header('Content-Type: application/xml; charset=utf-8');
+        
+        $baseUrl = 'https://cuidadosmeus.com.br/divulga';
+        $today = date('Y-m-d');
+        
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        
+        // Home
+        $xml .= '<url>';
+        $xml .= '<loc>' . $baseUrl . '/</loc>';
+        $xml .= '<lastmod>' . $today . '</lastmod>';
+        $xml .= '<changefreq>daily</changefreq>';
+        $xml .= '<priority>1.0</priority>';
+        $xml .= '</url>';
+        
+        // Landing Page
+        $xml .= '<url>';
+        $xml .= '<loc>' . $baseUrl . '/divulgue</loc>';
+        $xml .= '<lastmod>' . $today . '</lastmod>';
+        $xml .= '<changefreq>monthly</changefreq>';
+        $xml .= '<priority>0.8</priority>';
+        $xml .= '</url>';
+        
+        $xml .= '</urlset>';
+        
+        echo $xml;
+    }
+
     public function index()
     {
         $ilpiModel = new ILPI();

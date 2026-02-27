@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /ilpi/
+Disallow: /api/
+Allow: /
+Sitemap: https://cuidadosmeus.com.br/divulga/sitemap.xml
