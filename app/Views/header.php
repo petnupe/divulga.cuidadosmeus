@@ -4,6 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Divulga Cuidados Meus - Vagas em ILPIs</title>
+    <meta name="description" content="Encontre a ILPI ideal para idosos. Vagas em Instituições de Longa Permanência com fotos, preços e contato direto.">
+    
+    <?php 
+    $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $canonicalUrl = 'https://cuidadosmeus.com.br/divulga' . ($currentPath === '/' ? '' : $currentPath);
+    ?>
+    <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl) ?>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= htmlspecialchars($canonicalUrl) ?>">
+    <meta property="og:title" content="Divulga Cuidados Meus - Vagas em ILPIs">
+    <meta property="og:description" content="Encontre a ILPI ideal para idosos. Vagas em Instituições de Longa Permanência com fotos, preços e contato direto.">
+    <meta property="og:image" content="https://cuidadosmeus.com.br/divulga/assets/img/logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<?= htmlspecialchars($canonicalUrl) ?>">
+    <meta property="twitter:title" content="Divulga Cuidados Meus - Vagas em ILPIs">
+    <meta property="twitter:description" content="Encontre a ILPI ideal para idosos. Vagas em Instituições de Longa Permanência com fotos, preços e contato direto.">
+    <meta property="twitter:image" content="https://cuidadosmeus.com.br/divulga/assets/img/logo.png">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
