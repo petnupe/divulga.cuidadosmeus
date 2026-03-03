@@ -74,7 +74,18 @@
                                             </div>
                                         </td>
                                         <td><?= htmlspecialchars($ilpi['cidade_nome']) ?> / <?= htmlspecialchars($ilpi['estado_uf']) ?></td>
-                                        <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($ilpi['plano_nome']) ?></span></td>
+                                        <td>
+                                            <form action="/admin/ilpis/update-plan/<?= (int)$ilpi['id'] ?>" method="POST" class="d-flex align-items-center gap-2">
+                                                <select name="plano_id" class="form-select form-select-sm" style="max-width: 180px;">
+                                                    <?php foreach ($planos as $plano): ?>
+                                                        <option value="<?= (int)$plano['id'] ?>" <?= $plano['id'] == $ilpi['plano_id'] ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($plano['nome']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary">Salvar</button>
+                                            </form>
+                                        </td>
                                         <td>
                                             <?php if ($ilpi['status'] == 'pendente'): ?>
                                                 <span class="badge bg-warning text-dark">Pendente</span>
@@ -112,5 +123,10 @@
         </div>
     </div>
 </div>
+<?php if (isset($_GET['plan_updated'])): ?>
+    <div class="alert alert-success mx-3"><i class="fas fa-check-circle me-1"></i>Plano atualizado com sucesso.</div>
+<?php elseif (isset($_GET['plan_error'])): ?>
+    <div class="alert alert-danger mx-3"><i class="fas fa-exclamation-triangle me-1"></i>Erro ao atualizar plano (<?= htmlspecialchars($_GET['plan_error']) ?>).</div>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/../footer.php'; ?>

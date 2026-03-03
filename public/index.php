@@ -76,6 +76,8 @@ $router->add('GET', '/admin/transacoes/cancel/{id}', 'AdminController', 'cancela
 $router->add('GET', '/admin/logout', 'AdminController', 'logout');
 $router->add('GET', '/admin/planos', 'AdminController', 'planos');
 $router->add('POST', '/admin/planos/update/{id}', 'AdminController', 'updatePlano');
+// Admin ILPI Plan Management
+$router->add('POST', '/admin/ilpis/update-plan/{id}', 'AdminController', 'updateIlpiPlan');
 
 // Leito Routes
 $router->add('GET', '/ilpi/leitos/create', 'LeitoController', 'create');

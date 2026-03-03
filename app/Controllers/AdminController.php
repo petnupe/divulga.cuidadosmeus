@@ -72,11 +72,13 @@ class AdminController extends Controller
     {
         $this->checkAuth();
         $ilpiModel = new ILPI();
+        $planoModel = new Plano();
         
         $status = $_GET['status'] ?? null;
         $ilpis = $ilpiModel->getAllWithStatus($status);
+        $planos = $planoModel->getAll();
 
-        $this->view('admin/ilpis', ['ilpis' => $ilpis, 'currentStatus' => $status]);
+        $this->view('admin/ilpis', ['ilpis' => $ilpis, 'currentStatus' => $status, 'planos' => $planos]);
     }
 
     public function approve($id)
@@ -262,6 +264,34 @@ class AdminController extends Controller
         ];
         $planoModel->updatePlan($id, $data);
         $this->redirect('/admin/planos?updated=1');
+    }
+
+    public function updateIlpiPlan($id)
+    {
+        $this->checkAuth();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/ilpis');
+        }
+        $newPlanoId = (int)($_POST['plano_id'] ?? 0);
+        if ($newPlanoId <= 0) {
+            $this->redirect('/admin/ilpis?plan_error=invalid');
+            return;
+        }
+        $planoModel = new Plano();
+        $plano = $planoModel->find($newPlanoId);
+        if (!$plano) {
+            $this->redirect('/admin/ilpis?plan_error=not_found');
+            return;
+        }
+        $ilpiModel = new ILPI();
+        $ilpi = $ilpiModel->find($id);
+        if (!$ilpi) {
+            $this->redirect('/admin/ilpis?plan_error=ilpi_not_found');
+            return;
+        }
+        // Update plan without touching billing/transactions
+        $ilpiModel->update($id, ['plano_id' => $newPlanoId]);
+        $this->redirect('/admin/ilpis?plan_updated=1');
     }
 
     public function gerarPixTransacao($id)
